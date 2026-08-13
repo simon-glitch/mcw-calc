@@ -28,7 +28,10 @@ const colorText = computed({
     }
   },
 })
-const edition = ref<'java' | 'bedrock'>('java')
+const edition = ref<'java' | 'java_2x2' | 'java_brown' | 'java_1_4_3' | 'java_12w34a' | 'bedrock'>('java')
+const found = ref(0)
+const loading = ref(false)
+const loadedEdition = ref<'java' | 'java_2x2' | 'java_brown' | 'java_1_4_3' | 'java_12w34a' | 'bedrock'>('java')
 const canvasRef = useTemplateRef('canvasRef')
 const sequence = ref<[Color[][], number, [number, number, number]]>([['white'], 0, [249, 255, 254]])
 
@@ -42,10 +45,38 @@ function generateDyeName(color: Color) {
 
 const worker = new ComlinkWorker<typeof import('./worker')>(new URL('./worker', import.meta.url))
 
+async function loadEdition() {
+  loading.value = true
+  try {
+    found.value =
+    edition === 'java'        ? worder.load_f_main :
+    edition === 'java_2x2'    ? worder.load_f_2x2 :
+    edition === 'java_brown'  ? worder.load_f_brown :
+    edition === 'java_1_4_3'  ? worder.load_f_1_4_3 :
+    edition === 'java_12w34a' ? worder.load_f_12w34a :
+    await worker.load_f_be()
+    loadedEdition.value = edition.value
+  } finally {
+    loading.value = false
+  }
+}
+
+async function loadEditionIfNeeded() {
+  if (loadedEdition.value === edition.value) return
+  await loadEdition()
+}
+
 async function updateSequence(targetColor: [number, number, number]) {
+  await loadEditionIfNeeded()
   await nextTick()
   sequence.value = await worker.colorToSequence(targetColor, edition.value)
 }
+
+void loadEdition()
+
+watch(edition, () => {
+  void loadEdition()
+})
 
 watch([sequence, canvasRef], ([sequence, canvasRef]) => {
   const canvas = canvasRef
@@ -121,6 +152,10 @@ watch([sequence, canvasRef], ([sequence, canvasRef]) => {
 
     <CdxTabs v-model:active="edition" class="mb-2">
       <CdxTab name="java" :label="t('armorColor.java')" />
+      <CdxTab name="java_2x2" :label="t('armorColor.java_2x2')" />
+      <CdxTab name="java_brown" :label="t('armorColor.java_brown')" />
+      <CdxTab name="java_1_4_3" :label="t('armorColor.java_1_4_3')" />
+      <CdxTab name="java_12w34a" :label="t('armorColor.java_12w34a')" />
       <CdxTab name="bedrock" :label="t('armorColor.bedrock')" />
     </CdxTabs>
     <div
@@ -145,7 +180,7 @@ watch([sequence, canvasRef], ([sequence, canvasRef]) => {
           <label for="color-picker">{{ t('armorColor.color') }}</label>
           <input id="color-picker" v-model="color" type="color" />
           <CdxTextInput v-model="colorText" class="min-w-[100px] font-mono" type="text" />
-          <CdxButton @click="updateSequence(colorStringToRgb(color))">
+          <CdxButton :disabled="loading" @click="updateSequence(colorStringToRgb(color))">
             {{ t('armorColor.calculate') }}
           </CdxButton>
         </div>
@@ -190,6 +225,9 @@ watch([sequence, canvasRef], ([sequence, canvasRef]) => {
             }}
           </span>
         </div>
+        </div>
+        <div>
+          {{ found.toLocaleString() }} colors available
         </div>
         <div>
           <span class="explain" :title="t('armorColor.dE.help')">

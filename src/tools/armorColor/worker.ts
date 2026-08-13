@@ -140,7 +140,7 @@ const base_colors_names = [
     "pink",       /* #f38baa 15 */
 ];
 
-export let found = 0;
+let found = 0;
 // index of the last mixer used;
 const recipes = new Color_Recipes();
 // the last color used; for any i, if there is no last color, then last_cs[i] === i;
@@ -349,40 +349,46 @@ async function load_local(){
 
 const path_base: string = "zips/"
 /** Colors used from 17w06a to now. */
-function load_f_main(){
+export async function load_f_main(){
     load_e = load_je;
     local_path = path_base + "je_lab_main.zip";
-    load_local();
+    await load_local();
+    return found;
 };
 /** Colors used from 17w06a to now (2x2 crafting grid). */
-function load_f_2x2(){
+export async function load_f_2x2(){
     load_e = load_je;
-    local_path = path_base + "je_lab_2x2.zip" ;
-    load_local();
+    local_path = path_base + "je_lab_2x2.zip";
+    await load_local();
+    return found;
 };
 /** Colors used from 17w06a to now (using the minimum amount of brown dye). */
-function load_f_brown(){
+export async function load_f_brown(){
     load_e = load_je;
-    local_path = path_base + "je_lab_12w34a.zip" ;
-    load_local();
+    local_path = path_base + "je_lab_12w34a.zip";
+    await load_local();
+    return found;
 };
 /** Colors used from 1.4.3 to 17w06a. */
-function load_f_1_4_3(){
+export async function load_f_1_4_3(){
     load_e = load_je;
-    local_path = path_base + "je_lab_1_4_3.zip" ;
-    load_local();
+    local_path = path_base + "je_lab_1_4_3.zip";
+    await load_local();
+    return found;
 };
 /** Colors used from 12w34a (when armor dyeing was first added) to 1.4.3. The colors themselves were added in Beta 1.2, before armor dyeing was a mechanic. */
-function load_f_12w34a(){
+export async function load_f_12w34a(){
     load_e = load_je;
-    local_path = path_base + "je_lab_12w34a.zip" ;
-    load_local();
+    local_path = path_base + "je_lab_12w34a.zip";
+    await load_local();
+    return found;
 };
 /** BE colors and cauldron recipes. */
-function load_f_be(){
+export async function load_f_be(){
     load_e = load_be;
-    local_path = path_base + "be_lab.zip" ;
-    load_local();
+    local_path = path_base + "be_lab.zip";
+    await load_local();
+    return found;
 };
 
 function handler(f: (targetColor: number) => number[][], targetColor: [number, number, number]){
