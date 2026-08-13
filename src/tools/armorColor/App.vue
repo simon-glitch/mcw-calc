@@ -225,8 +225,11 @@ watch([sequence, canvasRef], ([sequence, canvasRef]) => {
             }}
           </span>
         </div>
+        <div v-if="edition === 'java_2x2' || edition === 'java_brown' || edition === 'java_1_4_3' || edition === 'java_12w34a'">
+          {{ t(`armorColor.explanation.${edition}`) }}
+        </div>
         <div>
-          {{ found.toLocaleString() }} obtainable colors
+          {{ found.toLocaleString() }} obtainable colors.
         </div>
         <div>
           <span class="explain" :title="t('armorColor.dE.help')">
