@@ -229,7 +229,7 @@ watch([sequence, canvasRef], ([sequence, canvasRef]) => {
           {{ t(`armorColor.explanation.${edition}`) }}
         </div>
         <div>
-          {{ found.toLocaleString() }} obtainable colors.
+          {{ found.toLocaleString() }} {{ t(`armorColor.obtainable_colors`) }}.
         </div>
         <div>
           <span class="explain" :title="t('armorColor.dE.help')">
