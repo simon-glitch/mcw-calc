@@ -28,12 +28,12 @@ const colorText = computed({
     }
   },
 })
-const edition = ref<'java' | 'java_2x2' | 'java_brown' | 'java_1_4_3' | 'java_12w34a' | 'bedrock'>('java')
+const edition = ref<'java' | 'bedrock' | 'java_2x2' | 'java_brown' | 'java_1_4_3' | 'java_12w34a'>('java')
 const found = ref(0)
 const loading = ref(false)
-const loadedEdition = ref<'java' | 'java_2x2' | 'java_brown' | 'java_1_4_3' | 'java_12w34a' | 'bedrock'>('java')
+const loadedEdition = ref<'java' | 'bedrock' | 'java_2x2' | 'java_brown' | 'java_1_4_3' | 'java_12w34a' | null>(null)
 const canvasRef = useTemplateRef('canvasRef')
-const sequence = ref<[Color[][], number, [number, number, number]]>([['white'], 0, [249, 255, 254]])
+const sequence = ref<[Color[][], number, [number, number, number]]>([[['white']], 0, [249, 255, 254]])
 
 function generateDye(color: Color) {
   return getImageLink(`en:Invicon_${imgNames[color]}_Dye.png`)
@@ -49,11 +49,11 @@ async function loadEdition() {
   loading.value = true
   try {
     found.value =
-    edition === 'java'        ? worder.load_f_main :
-    edition === 'java_2x2'    ? worder.load_f_2x2 :
-    edition === 'java_brown'  ? worder.load_f_brown :
-    edition === 'java_1_4_3'  ? worder.load_f_1_4_3 :
-    edition === 'java_12w34a' ? worder.load_f_12w34a :
+    edition.value === 'java'        ? await worker.load_f_main() :
+    edition.value === 'java_2x2'    ? await worker.load_f_2x2() :
+    edition.value === 'java_brown'  ? await worker.load_f_brown() :
+    edition.value === 'java_1_4_3'  ? await worker.load_f_1_4_3() :
+    edition.value === 'java_12w34a' ? await worker.load_f_12w34a() :
     await worker.load_f_be()
     loadedEdition.value = edition.value
   } finally {
@@ -152,11 +152,11 @@ watch([sequence, canvasRef], ([sequence, canvasRef]) => {
 
     <CdxTabs v-model:active="edition" class="mb-2">
       <CdxTab name="java" :label="t('armorColor.java')" />
+      <CdxTab name="bedrock" :label="t('armorColor.bedrock')" />
       <CdxTab name="java_2x2" :label="t('armorColor.java_2x2')" />
       <CdxTab name="java_brown" :label="t('armorColor.java_brown')" />
       <CdxTab name="java_1_4_3" :label="t('armorColor.java_1_4_3')" />
       <CdxTab name="java_12w34a" :label="t('armorColor.java_12w34a')" />
-      <CdxTab name="bedrock" :label="t('armorColor.bedrock')" />
     </CdxTabs>
     <div
       :style="{
@@ -195,7 +195,7 @@ watch([sequence, canvasRef], ([sequence, canvasRef]) => {
           :title="t(`armorColor.sequence.help${edition === 'bedrock' ? 'Bedrock' : ''}`)"
         >
           {{ t('armorColor.sequence') }}
-          <template v-for="(step, stepIndex) in (edition === 'bedrock' ? [sequence[0]] : sequence[0])" :key="stepIndex">
+          <template v-for="(step, stepIndex) in (edition === 'bedrock' ? sequence[0] : sequence[0])" :key="stepIndex">
             <span v-if="stepIndex > 0" class="step-separator">➔</span>
             <div v-for="(item, itemIndex) in step" :key="itemIndex">
               <img
@@ -208,7 +208,7 @@ watch([sequence, canvasRef], ([sequence, canvasRef]) => {
               />
             </div>
           </template>
-
+          
           <span
             id="result-color"
             :style="{
@@ -225,9 +225,8 @@ watch([sequence, canvasRef], ([sequence, canvasRef]) => {
             }}
           </span>
         </div>
-        </div>
         <div>
-          {{ found.toLocaleString() }} colors available
+          {{ found.toLocaleString() }} obtainable colors
         </div>
         <div>
           <span class="explain" :title="t('armorColor.dE.help')">

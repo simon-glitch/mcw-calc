@@ -1,5 +1,11 @@
 import type { Color } from '@/utils/color'
 import { rgb2lab, deltaE } from '@/utils/color'
+import jeLabMain from './zips/je_lab_main.zip?url'
+import jeLab2x2 from './zips/je_lab_2x2.zip?url'
+import jeLabBrown from './zips/je_lab_12w34a.zip?url'
+import jeLab143 from './zips/je_lab_1_4_3.zip?url'
+import jeLab12w34a from './zips/je_lab_12w34a.zip?url'
+import beLab from './zips/be_lab.zip?url'
 
 /*
 function sequenceToColorJavaArmor(
@@ -122,22 +128,22 @@ const base_colors_be = [
     0xf38baa, /* #f38baa pink    */
 ];
 const base_colors_names = [
-    "white",      /* #f9fffe  0 */
-    "light_gray", /* #9d9d97  1 */
-    "gray",       /* #474f52  2 */
-    "black",      /* #1d1d21  3 */
-    "brown",      /* #835432  4 */
-    "red",        /* #b02e26  5 */
-    "orange",     /* #f9801d  6 */
-    "yellow",     /* #fed83d  7 */
-    "lime",       /* #80c71f  8 */
-    "green",      /* #5e7c16  9 */
-    "cyan",       /* #169c9c 10 */
-    "light_blue", /* #3ab3da 11 */
-    "blue",       /* #3c44aa 12 */
-    "purple",     /* #8932b8 13 */
-    "magenta",    /* #c74ebd 14 */
-    "pink",       /* #f38baa 15 */
+    "white",     /* #f9fffe  0 */
+    "lightGray", /* #9d9d97  1 */
+    "gray",      /* #474f52  2 */
+    "black",     /* #1d1d21  3 */
+    "brown",     /* #835432  4 */
+    "red",       /* #b02e26  5 */
+    "orange",    /* #f9801d  6 */
+    "yellow",    /* #fed83d  7 */
+    "lime",      /* #80c71f  8 */
+    "green",     /* #5e7c16  9 */
+    "cyan",      /* #169c9c 10 */
+    "lightBlue", /* #3ab3da 11 */
+    "blue",      /* #3c44aa 12 */
+    "purple",    /* #8932b8 13 */
+    "magenta",   /* #c74ebd 14 */
+    "pink",      /* #f38baa 15 */
 ];
 
 let found = 0;
@@ -347,58 +353,57 @@ async function load_local(){
     load_e(raw_bytes);
 }
 
-const path_base: string = "zips/"
 /** Colors used from 17w06a to now. */
 export async function load_f_main(){
     load_e = load_je;
-    local_path = path_base + "je_lab_main.zip";
+    local_path = jeLabMain;
     await load_local();
     return found;
 };
 /** Colors used from 17w06a to now (2x2 crafting grid). */
 export async function load_f_2x2(){
     load_e = load_je;
-    local_path = path_base + "je_lab_2x2.zip";
+    local_path = jeLab2x2;
     await load_local();
     return found;
 };
 /** Colors used from 17w06a to now (using the minimum amount of brown dye). */
 export async function load_f_brown(){
     load_e = load_je;
-    local_path = path_base + "je_lab_12w34a.zip";
+    local_path = jeLabBrown;
     await load_local();
     return found;
 };
 /** Colors used from 1.4.3 to 17w06a. */
 export async function load_f_1_4_3(){
     load_e = load_je;
-    local_path = path_base + "je_lab_1_4_3.zip";
+    local_path = jeLab143;
     await load_local();
     return found;
 };
 /** Colors used from 12w34a (when armor dyeing was first added) to 1.4.3. The colors themselves were added in Beta 1.2, before armor dyeing was a mechanic. */
 export async function load_f_12w34a(){
     load_e = load_je;
-    local_path = path_base + "je_lab_12w34a.zip";
+    local_path = jeLab12w34a;
     await load_local();
     return found;
 };
 /** BE colors and cauldron recipes. */
 export async function load_f_be(){
     load_e = load_be;
-    local_path = path_base + "be_lab.zip";
+    local_path = beLab;
     await load_local();
     return found;
 };
 
-function handler(f: (targetColor: number) => number[][], targetColor: [number, number, number]){
-  const tColor = (targetColor[0] << 16) | (targetColor[0] << 8) | targetColor[0];
+function handler(f: (targetColor: number) => number[][], targetColor: [number, number, number]): [Color[][], number, [number, number, number]]{
+  const tColor = (targetColor[0] << 16) | (targetColor[1] << 8) | targetColor[2];
   const aColor = c_exists.get(tColor) ? tColor : closest.get(tColor);
-  const approxColor = [(aColor & 0xff0000) >> 16, (aColor & 0x00ff00) >> 8, aColor & 0x0000ff];
+  const approxColor: [number, number, number] = [(aColor & 0xff0000) >> 16, (aColor & 0x00ff00) >> 8, aColor & 0x0000ff];
   const res: number[][] = f(aColor);
   const colorNames = res.map(v => v.map(i => (base_colors_names[i] as Color)));
   const de = deltaE(rgb2lab(targetColor), rgb2lab(approxColor));
-  return [colorNames, approxColor, de];
+  return [colorNames, de, approxColor];
 }
 
 export async function colorToSequence(
