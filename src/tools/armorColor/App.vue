@@ -30,7 +30,7 @@ const colorText = computed({
 })
 const edition = ref<'java' | 'bedrock'>('java')
 const canvasRef = useTemplateRef('canvasRef')
-const sequence = ref<[Color[], number, [number, number, number]]>([['white'], 0, [249, 255, 254]])
+const sequence = ref<[Color[][], number, [number, number, number]]>([['white'], 0, [249, 255, 254]])
 
 function generateDye(color: Color) {
   return getImageLink(`en:Invicon_${imgNames[color]}_Dye.png`)
@@ -160,16 +160,20 @@ watch([sequence, canvasRef], ([sequence, canvasRef]) => {
           :title="t(`armorColor.sequence.help${edition === 'bedrock' ? 'Bedrock' : ''}`)"
         >
           {{ t('armorColor.sequence') }}
-          <div v-for="(item, index) in sequence[0]" :key="index">
-            <img
-              :src="generateDye(item)"
-              :alt="item"
-              :title="generateDyeName(item)"
-              :data-minetip-title="generateDyeName(item)"
-              style="height: 2em; width: 2em"
-              class="explain minetip pixel-image"
-            />
-          </div>
+          <template v-for="(step, stepIndex) in (edition === 'bedrock' ? [sequence[0]] : sequence[0])" :key="stepIndex">
+            <span v-if="stepIndex > 0" class="step-separator">➔</span>
+            <div v-for="(item, itemIndex) in step" :key="itemIndex">
+              <img
+                :src="generateDye(item)"
+                :alt="item"
+                :title="generateDyeName(item)"
+                :data-minetip-title="generateDyeName(item)"
+                style="height: 2em; width: 2em"
+                class="explain minetip pixel-image"
+              />
+            </div>
+          </template>
+
           <span
             id="result-color"
             :style="{
@@ -178,13 +182,14 @@ watch([sequence, canvasRef], ([sequence, canvasRef]) => {
               '--color-b': sequence[2][2],
             }"
           >&nbsp;#{{
-              sequence[2][0].toString(16)
+              sequence[2][0].toString(16).padStart(2, '0')
             }}{{
-              sequence[2][1].toString(16)
+              sequence[2][1].toString(16).padStart(2, '0')
             }}{{
-              sequence[2][2].toString(16)
+              sequence[2][2].toString(16).padStart(2, '0')
             }}
           </span>
+        </div>
         </div>
         <div>
           <span class="explain" :title="t('armorColor.dE.help')">
